@@ -43,6 +43,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [aliasError, setAliasError] = useState("");
   const [formError, setFormError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const handleShorten = async () => {
     if (!url) return;
@@ -90,6 +91,7 @@ function App() {
         setStats(null);
         setAliasError("");
         setFormError("");
+        setCopied(false);
       }
     } catch (error) {
       setFormError("Unable to reach the server right now. Please try again.");
@@ -114,6 +116,18 @@ function App() {
     const currentValue = Number.parseInt(expiry || "0", 10);
     const nextValue = Math.max(currentValue + delta, 0);
     setExpiry(nextValue === 0 ? "" : String(nextValue));
+  };
+
+  const handleCopyShortUrl = async () => {
+    if (!shortUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch (error) {
+      setFormError("Copy failed. Please copy the short URL manually.");
+    }
   };
 
   return (
@@ -286,14 +300,29 @@ function App() {
             {shortUrl && (
               <div className="result-card">
                 <span className="result-card__label">Short URL</span>
-                <a
-                  className="result-card__link"
-                  href={shortUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {shortUrl}
-                </a>
+                <div className="result-card__row">
+                  <a
+                    className="result-card__link"
+                    href={shortUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="result-card__url-text">{shortUrl}</span>
+                  </a>
+                  <button
+                    type="button"
+                    className={`copy-button${copied ? " copy-button--copied" : ""}`}
+                    onClick={handleCopyShortUrl}
+                    aria-label="Copy short URL"
+                    title={copied ? "Copied" : "Copy short URL"}
+                  >
+                    <span className="copy-button__icon" aria-hidden="true">
+                      <span className="copy-button__square copy-button__square--back" />
+                      <span className="copy-button__square copy-button__square--front" />
+                    </span>
+                  </button>
+                </div>
+                {copied && <span className="copy-feedback">Copied to clipboard</span>}
                 <button className="stats-button" onClick={handleStats}>
                   View Stats
                 </button>
