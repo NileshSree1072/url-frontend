@@ -1,16 +1,217 @@
-# React + Vite
+# URL Shortener Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack URL shortener with a FastAPI backend and a React + Vite frontend.
 
-Currently, two official plugins are available:
+The app lets you:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- shorten long URLs
+- create a custom alias
+- add an optional expiry time in minutes
+- redirect short links through the backend
+- view total click stats for a short code
+- use a polished animated dashboard UI with interactive glow effects
 
-## React Compiler
+## Project Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This repository is split into two sibling folders:
 
-## Expanding the ESLint configuration
+```text
+URL_shortner/
+|- backend/
+|  |- main.py
+|  |- database.py
+|  |- cache.py
+|  |- rate_limiter.py
+|  |- utils.py
+|  |- requirements.txt
+|  `- render.yaml
+`- frontend/
+   |- src/
+   |- public/
+   |- package.json
+   `- README.md
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Tech Stack
+
+### Frontend
+
+- React 19
+- Vite
+- Custom UI components
+- `three`
+- `@react-three/fiber`
+
+### Backend
+
+- FastAPI
+- Supabase
+- Upstash Redis
+- Uvicorn
+
+## Features
+
+### URL creation
+
+- Submit a long URL and get back a short link
+- Optionally provide a custom alias
+- Optionally provide an expiry time in minutes
+- Alias length is limited to 10 characters to match the backend constraint
+
+### Redirect flow
+
+- Visiting a short code redirects to the original URL
+- Cached links are checked before the database
+- Expired links are rejected
+
+### Analytics
+
+- Clicks are logged on redirect
+- The dashboard can fetch and display total clicks for a short code
+
+### Frontend UX
+
+- Animated silk background
+- Border glow interaction on the main card and form inputs
+- Inline validation for alias conflicts and request failures
+- Custom expiry stepper controls
+
+## API Endpoints
+
+### `POST /shorten`
+
+Creates a short URL.
+
+Query parameters:
+
+- `original_url` required
+- `custom_code` optional
+- `expiry_minutes` optional
+
+Example:
+
+```http
+POST /shorten?original_url=https://example.com&custom_code=demo1&expiry_minutes=30
+```
+
+Example success response:
+
+```json
+{
+  "short_url": "http://127.0.0.1:8000/demo1",
+  "expires_at": "2026-03-30T10:15:00.000000"
+}
+```
+
+### `GET /{code}`
+
+Redirects the visitor to the original URL if the short code exists and has not expired.
+
+### `GET /stats/{code}`
+
+Returns click stats for a short code.
+
+Example response:
+
+```json
+{
+  "total_clicks": 3,
+  "data": []
+}
+```
+
+## Environment Variables
+
+Create a `.env` file inside `backend/` with these keys:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token
+BASE_URL=http://127.0.0.1:8000
+```
+
+Do not commit real secrets.
+
+## Local Development
+
+### 1. Start the backend
+
+Open a terminal in `backend/`.
+
+Create and activate a virtual environment if needed, then install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+Run the API:
+
+```powershell
+uvicorn main:app --reload
+```
+
+The backend runs on:
+
+```text
+http://127.0.0.1:8000
+```
+
+### 2. Start the frontend
+
+Open a second terminal in `frontend/`.
+
+Install dependencies:
+
+```powershell
+npm install
+```
+
+Run the Vite dev server:
+
+```powershell
+npm run dev
+```
+
+The frontend usually runs on:
+
+```text
+http://localhost:5173
+```
+
+## Available Frontend Scripts
+
+```powershell
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Deployment Notes
+
+The backend includes a `render.yaml` file for Render deployment.
+
+Current Render service settings:
+
+- runtime: Python
+- build command: `pip install -r requirements.txt`
+- start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+If you deploy the backend, update `BASE_URL` so generated short links point to the deployed API instead of localhost.
+
+## Known Notes
+
+- The frontend build currently works, but the bundle is larger because of the `three` background.
+- Alias conflicts and validation issues are shown inline in the dashboard UI.
+- If you change backend serialization or database constraints, restart the backend server so the frontend hits the latest code.
+
+## Recommended Workflow
+
+1. Start the backend first.
+2. Start the frontend.
+3. Enter a long URL.
+4. Optionally add a custom alias and expiry time.
+5. Create the short URL.
+6. Use the generated short link and inspect stats from the dashboard.
