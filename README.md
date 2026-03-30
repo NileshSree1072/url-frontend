@@ -134,6 +134,14 @@ BASE_URL=http://127.0.0.1:8000
 
 Do not commit real secrets.
 
+For the frontend, create a `.env` file inside `frontend/` when working locally:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000
+```
+
+The React app reads the backend base URL from `import.meta.env.VITE_API_URL`.
+
 ## Local Development
 
 ### 1. Start the backend
@@ -180,6 +188,8 @@ The frontend usually runs on:
 http://localhost:5173
 ```
 
+Make sure `VITE_API_URL` points to the backend you want to use.
+
 ## Available Frontend Scripts
 
 ```powershell
@@ -200,6 +210,31 @@ Current Render service settings:
 - start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 
 If you deploy the backend, update `BASE_URL` so generated short links point to the deployed API instead of localhost.
+
+### Vercel frontend deployment
+
+If you deploy the frontend to Vercel:
+
+1. Import the `frontend/` project into Vercel.
+2. Set the build command to:
+
+```text
+npm run build
+```
+
+3. Set the output directory to:
+
+```text
+dist
+```
+
+4. Add this environment variable in Vercel:
+
+```text
+VITE_API_URL=https://your-backend-domain.com
+```
+
+Use your deployed FastAPI backend URL for `VITE_API_URL`.
 
 ## Known Notes
 

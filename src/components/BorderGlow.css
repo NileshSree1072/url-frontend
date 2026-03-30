@@ -1,0 +1,84 @@
+.border-glow {
+  position: relative;
+  border-radius: var(--border-glow-radius, 28px);
+  padding: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  isolation: isolate;
+  overflow: visible;
+  transition: transform 180ms ease;
+}
+
+.border-glow:hover,
+.border-glow:focus-within {
+  transform: translateY(-1px);
+}
+
+.border-glow__content {
+  position: relative;
+  z-index: 2;
+  border-radius: var(--border-glow-inner-radius, 27px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--border-glow-background, #060010);
+}
+
+.border-glow__border,
+.border-glow__halo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--border-glow-opacity, 0);
+  transition: opacity 180ms ease;
+}
+
+.border-glow__border {
+  z-index: 1;
+  background:
+    radial-gradient(
+      circle at var(--border-glow-x, 50%) var(--border-glow-y, 50%),
+      rgb(var(--border-glow-color, 40 80 80) / var(--border-glow-alpha-strong, 0.7)),
+      transparent 38%
+    ),
+    var(--border-glow-colors);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08) inset,
+    0 0 18px rgb(var(--border-glow-color, 40 80 80) / calc(var(--border-glow-alpha-soft, 0.4))),
+    0 0 32px rgb(192 132 252 / calc(var(--border-glow-alpha-soft, 0.25)));
+}
+
+.border-glow__halo {
+  z-index: 0;
+  inset: -12px;
+  filter: blur(var(--border-glow-radius-blur, 40px));
+  background:
+    radial-gradient(
+      circle at var(--border-glow-x, 50%) var(--border-glow-y, 50%),
+      rgb(var(--border-glow-color, 40 80 80) / var(--border-glow-alpha-soft, 0.45)),
+      transparent 42%
+    ),
+    var(--border-glow-colors);
+  opacity: calc(max(var(--border-glow-opacity, 0), 0.18));
+}
+
+.border-glow:hover .border-glow__border,
+.border-glow:focus-within .border-glow__border,
+.border-glow:hover .border-glow__halo,
+.border-glow:focus-within .border-glow__halo {
+  opacity: var(--border-glow-opacity, 0);
+}
+
+.border-glow--animated .border-glow__border,
+.border-glow--animated .border-glow__halo {
+  animation: border-glow-spin 6s linear infinite;
+}
+
+@keyframes border-glow-spin {
+  from {
+    transform: rotate(0deg) scale(1.02);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.02);
+  }
+}
